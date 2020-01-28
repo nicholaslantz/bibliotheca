@@ -107,19 +107,19 @@ LST after the first occurence, otherwise NIL."
 (defun range (start &optional (stop nil) (step nil))  
   "Produce list of numbers beginning from START (inclusive)
 and ending at STOP (exclusive) incrementing by STEP."
-  (cond ((and stop step) (iota-int start stop step))
-	(stop (iota-int start stop (if (> stop start) 1 -1)))
-	(t (iota-int 0 start 1))))
+  (cond ((and stop step) (range-int start stop step))
+	(stop (range-int start stop (if (> stop start) 1 -1)))
+	(t (range-int 0 start 1))))
 
 (defun range-int (start stop step &optional (acc nil))
   "Implementation of range"
   (if (< start stop)
       (if (>= start stop)
 	  (reverse acc)
-	  (iota-int (+ start step) stop step (cons start acc)))
+	  (range-int (+ start step) stop step (cons start acc)))
       (if (<= start stop)
 	  (reverse acc)
-	  (iota-int (+ start step) stop step (cons start acc)))))
+	  (range-int (+ start step) stop step (cons start acc)))))
 
 (defun flatten (lst &optional (rev t) (acc nil))
   "Return all atoms in nested list LST in a non-nested list.
