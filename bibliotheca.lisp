@@ -8,7 +8,7 @@
 	   :range
 	   :flatten :zip
 	   :assoc-default :assocdr :assocdr-if :assocdr-default
-	   :concat))
+	   :concat :join-strings))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -163,3 +163,8 @@ If REV is T, the returned list will be reversed"
 
 (defun concat (&rest strings)
   (apply #'concatenate (append '(string) strings)))
+
+(defun join-strings (strs with &optional (acc ""))
+  (if (null (cdr strs))
+      (concat acc (car strs))
+      (join-strings (cdr strs) with (concat acc (car strs) with))))
