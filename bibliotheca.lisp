@@ -1,7 +1,7 @@
 (defpackage :bibliotheca
   (:use :cl)
   (:export :ensure-list
-	   :if-let :if-not-let :and-let :or-let
+	   :if-let :if-not-let :and-let :or-let :when-let :unless-let
 	   :list-equal
 	   :beginsp :endsp :containsp
 	   :join :split :split-if
@@ -39,6 +39,16 @@
      (if (or ,@(mapcar #'car bindings))
 	 ,then
 	 ,else)))
+
+(defmacro when-let (bindings &body then)
+  `(let ,bindings
+     (when ,(caar bindings)
+       ,@then)))
+
+(defmacro unless-let (bindings &body then)
+  `(let ,bindings
+     (unless ,(caar bindings)
+       ,@then)))
 
 (defun list-equal (l1 l2 &optional (test #'eql))
   (cond ((and (null l1) (null l2)) t)
