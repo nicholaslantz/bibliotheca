@@ -7,7 +7,8 @@
 	   :join :split :split-if
 	   :range
 	   :flatten :zip
-	   :assoc-default :assocdr :assocdr-if :assocdr-default))
+	   :assoc-default :assocdr :assocdr-if :assocdr-default
+	   :concat))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -159,3 +160,6 @@ If REV is T, the returned list will be reversed"
   (if-let ((cell (assoc item alist)))
     (cdr cell)
     default))
+
+(defun concat (&rest strings)
+  (apply #'concatenate (append '(string) strings)))
