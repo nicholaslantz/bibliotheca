@@ -12,7 +12,7 @@
 	   :nth-wa
 	   :choose
 	   :clamp :lerp :invlerp :lmap
-	   :score :best))
+	   :score :best :bestk))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -218,3 +218,11 @@ Similar to indexing in Python."
   (reduce (lambda (acc n)
 	    (if (funcall predicate (cdr n) (cdr acc)) n acc))
 	  (score data fn :key key)))
+
+(defun bestk (data k fn &key (predicate #'>) (key #'identity))
+  (let ((res nil)
+	(working-data data))
+    (dotimes (i k res)
+      (push (best working-data fn :predicate predicate :key key)
+	    res)
+      (setf working-data (remove (caar res) working-data)))))
