@@ -11,7 +11,8 @@
 	   :concat :join-strings
 	   :nth-wa
 	   :choose
-	   :clamp :lerp :invlerp :lmap))
+	   :clamp :lerp :invlerp :lmap
+	   :score :best))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
