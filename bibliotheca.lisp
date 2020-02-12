@@ -10,7 +10,8 @@
 	   :assoc-default :assocdr :assocdr-if :assocdr-default
 	   :concat :join-strings
 	   :nth-wa
-	   :choose))
+	   :choose
+	   :clamp :lerp :invlerp :lmap))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -193,3 +194,15 @@ Similar to indexing in Python."
 	(len (length lst)))
     (dotimes (i n res)
       (push (nth (random len) lst) res))))
+
+(defun clamp (v a b)
+  (max a (min v b)))
+
+(defun lerp (v a b)
+  (+ a (* v (- b a))))
+
+(defun invlerp (x a b)
+  (/ (- x a) (- b a)))
+
+(defun lmap (x a b p q)
+  (lerp (invlerp x a b) p q))
