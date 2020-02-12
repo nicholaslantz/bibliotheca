@@ -12,7 +12,8 @@
 	   :nth-wa
 	   :choose
 	   :clamp :lerp :invlerp :lmap
-	   :score :best :bestk))
+	   :score :best :bestk
+	   :clearf))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -226,3 +227,6 @@ Similar to indexing in Python."
       (push (best working-data fn :predicate predicate :key key)
 	    res)
       (setf working-data (remove (caar res) working-data)))))
+
+(defmacro clearf (place)
+  `(setf ,place nil))
