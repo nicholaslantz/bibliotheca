@@ -189,12 +189,15 @@ If REV is T, the returned list will be reversed"
 Similar to indexing in Python."
   (nth (mod n (length lst)) lst))
 
-(defun choose (lst n)
+(defun choose (lst &optional (n 1))
   "Take N uniforamally-distributed samples from LST with replacement."
   (let ((res nil)
 	(len (length lst)))
-    (dotimes (i n res)
-      (push (nth (random len) lst) res))))
+    (dotimes (i n)
+      (push (nth (random len) lst) res))
+    (if (= n 1)
+	(car res)
+	res)))
 
 (defun clamp (v a b)
   (max a (min v b)))
