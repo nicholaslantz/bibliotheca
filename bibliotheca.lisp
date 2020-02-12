@@ -8,7 +8,9 @@
 	   :range
 	   :flatten :zip
 	   :assoc-default :assocdr :assocdr-if :assocdr-default
-	   :concat :join-strings))
+	   :concat :join-strings
+	   :nth-wa
+	   :choose))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -178,3 +180,16 @@ If REV is T, the returned list will be reversed"
   (if (null (cdr strs))
       (concat acc (car strs))
       (join-strings (cdr strs) with (concat acc (car strs) with))))
+
+(defun nth-wa (n lst)
+  "NTH, but N can be negative and longer than length of LST. It Wraps Around.
+
+Similar to indexing in Python."
+  (nth (mod n (length lst)) lst))
+
+(defun choose (lst n)
+  "Take N uniforamally-distributed samples from LST with replacement."
+  (let ((res nil)
+	(len (length lst)))
+    (dotimes (i n res)
+      (push (nth (random len) lst) res))))
