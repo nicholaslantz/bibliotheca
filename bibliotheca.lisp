@@ -206,3 +206,11 @@ Similar to indexing in Python."
 
 (defun lmap (x a b p q)
   (lerp (invlerp x a b) p q))
+
+(defun score (data fn &key (key #'identity))
+  (mapcar #'cons data (mapcar fn (mapcar key data))))
+
+(defun best (data fn &key (predicate) (key #'identity))
+  (reduce (lambda (acc n)
+	    (if (funcall predicate (cdr n) (cdr acc)) n acc))
+	  (score data fn :key key)))
