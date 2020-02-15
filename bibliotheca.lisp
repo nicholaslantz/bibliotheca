@@ -13,7 +13,8 @@
 	   :choose
 	   :clamp :lerp :invlerp :lmap
 	   :score :best :bestk
-	   :clearf))
+	   :clearf
+	   :~> :~>>))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -230,3 +231,13 @@ Similar to indexing in Python."
 
 (defmacro clearf (place)
   `(setf ,place nil))
+
+(defmacro ~> (form &body fns)
+  (if (endp fns)
+      form
+      `(~> ,(append (list (caar fns)) (list form) (cdar fns)) ,@(cdr fns))))
+
+(defmacro ~>> (form &body fns)
+  (if (endp fns)
+      form
+      `(~>> ,(append (car fns) (list form)) ,@(cdr fns))))
