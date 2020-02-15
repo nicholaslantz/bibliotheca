@@ -14,7 +14,9 @@
 	   :clamp :lerp :invlerp :lmap
 	   :score :best :bestk
 	   :clearf
-	   :~> :~>>))
+	   :~> :~>>
+	   :read-lines-until
+	   :strip-left :strip-right :strip))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -241,3 +243,20 @@ Similar to indexing in Python."
   (if (endp fns)
       form
       `(~>> ,(append (car fns) (list form)) ,@(cdr fns))))
+
+(defun read-lines-until (s test &optional (acc nil))
+  (let ((line (read-line s)))
+    (if (funcall test line)
+	(reverse acc)
+	(read-lines-until s test (cons line acc)))))
+
+(defun strip-left (line &optional (what '(#\Return #\Newline #\Space)))
+  (if (member (car line) what)
+      (strip-left (cdr line) what)
+      line))
+
+(defun strip-right (line &optional (what '(#\Return #\Newline #\Space)))
+  (nreverse (strip-left (reverse line) what)))
+
+(defun strip (line &optional (what '(#\Return #\Newline #\Space)))
+  (strip-right (strip-left line what) what))
