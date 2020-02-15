@@ -14,7 +14,8 @@
 	   :clamp :lerp :invlerp :lmap
 	   :score :best :bestk
 	   :clearf
-	   :~> :~>>))
+	   :~> :~>>
+	   :lm))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -241,3 +242,15 @@ Similar to indexing in Python."
   (if (endp fns)
       form
       `(~>> ,(append (car fns) (list form)) ,@(cdr fns))))
+
+(defmacro lm (fn)
+  (flet ((lambda-list (fn)
+	   (sort (~>> fn
+		   (flatten)
+		   (remove-if-not
+		    (lambda (v) (member v '($ $1 $2 $3 $4 $5))))
+		   (remove-duplicates))
+		 #'string<
+		 :key #'symbol-name)))
+    `(lambda ,(lambda-list fn)
+       ,fn)))
