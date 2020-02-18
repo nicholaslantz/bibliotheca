@@ -168,8 +168,8 @@ If REV is T, the returned list will be reversed"
     cell
     default))
 
-(defun assocdr (item alist)
-  (cdr (assoc item alist)))
+(defun assocdr (item alist &key (test #'eql))
+  (cdr (assoc item alist :test test)))
 
 (defun assocdr-if (predicate alist)
   (cdr (assoc-if predicate alist)))
