@@ -14,9 +14,10 @@
 	   :clamp :lerp :invlerp :lmap
 	   :score :best :bestk
 	   :clearf
-	   :~> :~>>
+	   :~> :~>> :as~>
 	   :read-lines-until
-	   :strip-left :strip-right :strip))
+	   :strip-left :strip-right :strip
+	   :lm))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
