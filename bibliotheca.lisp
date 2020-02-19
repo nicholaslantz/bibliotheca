@@ -244,6 +244,11 @@ Similar to indexing in Python."
       form
       `(~>> ,(append (car fns) (list form)) ,@(cdr fns))))
 
+(defmacro as~> (as form &body fns)
+  (if (endp fns)
+      form
+      `(as~> ,as ,(substitute form as (car fns)) ,@(cdr fns))))
+
 (defun read-lines-until (s test &optional (acc nil))
   (let ((line (read-line s)))
     (if (funcall test line)
