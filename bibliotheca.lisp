@@ -123,13 +123,6 @@ LST after the first occurence, otherwise NIL."
 	      (split-if (cdr lst) test nil acc))
 	  (split-if (cdr lst) test (cons (car lst) stack) acc))))
 
-(defun range (start &optional (stop nil) (step nil))  
-  "Produce list of numbers beginning from START (inclusive)
-and ending at STOP (exclusive) incrementing by STEP."
-  (cond ((and stop step) (range-int start stop step))
-	(stop (range-int start stop (if (> stop start) 1 -1)))
-	(t (range-int 0 start 1))))
-
 (defun range-int (start stop step &optional (acc nil))
   "Implementation of range"
   (if (< start stop)
@@ -139,6 +132,13 @@ and ending at STOP (exclusive) incrementing by STEP."
       (if (<= start stop)
 	  (reverse acc)
 	  (range-int (+ start step) stop step (cons start acc)))))
+
+(defun range (start &optional (stop nil) (step nil))  
+  "Produce list of numbers beginning from START (inclusive)
+and ending at STOP (exclusive) incrementing by STEP."
+  (cond ((and stop step) (range-int start stop step))
+	(stop (range-int start stop (if (> stop start) 1 -1)))
+	(t (range-int 0 start 1))))
 
 (defun flatten (lst &optional (rev t) (acc nil))
   "Return all atoms in nested list LST in a non-nested list.
@@ -260,3 +260,4 @@ Similar to indexing in Python."
 
 (defun strip (line &optional (what '(#\Return #\Newline #\Space)))
   (strip-right (strip-left line what) what))
+
