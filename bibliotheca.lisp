@@ -267,3 +267,17 @@ Similar to indexing in Python."
 (defun strip (line &optional (what '(#\Return #\Newline #\Space)))
   (strip-right (strip-left line what) what))
 
+(defun lm-vars (form)
+  (as~> v form
+    (flatten v)
+    (remove-if-not #'symbolp v)
+    (mapcar #'symbol-name v)
+    (remove-if-not (lambda (s) (member s '("$" "$1" "$2" "$3" "$4")
+				       :test #'string=))
+		   v)
+    (mapcar #'intern v)
+    (sort v #'string<)))
+
+(defmacro lm (&body body)
+  `(lambda ,(lm-vars body)
+     ,@body))
