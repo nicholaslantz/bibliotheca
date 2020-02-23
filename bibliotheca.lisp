@@ -7,6 +7,7 @@
 	   :join :split :split-if
 	   :range
 	   :flatten :zip
+	   :take :drop :group
 	   :assoc-default :assocdr :assocdr-if :assocdr-default
 	   :concat :join-strings
 	   :nth-wa
@@ -153,6 +154,23 @@ If REV is T, the returned list will be reversed"
 	 (flatten (cdr lst) rev (cons (car lst) acc)))
 	(t
 	 (flatten (cdr lst) rev (append (flatten (car lst)) acc)))))
+
+(defun take (lst &optional (n 1) (acc nil))
+  (if (or (endp lst) (zerop n))
+      (values (nreverse acc) lst)
+      (take (cdr lst) (- n 1) (cons (car lst) acc))))
+
+(defun drop (lst &optional (n 1))
+  (multiple-value-bind (head tail)
+      (take lst n)
+    (values tail head)))
+
+(defun group (lst n &optional (acc nil))
+  (if (or (endp lst) (null (nthcdr (- n 1) lst)))
+      (values (nreverse acc) lst)
+      (multiple-value-bind (next rst)
+	  (take lst n)
+	(group rst n (cons next acc)))))
 
 (defun zip (&rest lsts)
   (reduce (lambda (a b)
