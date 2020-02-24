@@ -18,7 +18,8 @@
 	   :~> :~>> :as~>
 	   :read-lines-until
 	   :strip-left :strip-right :strip
-	   :lm))
+	   :lm
+	   :explode))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -299,3 +300,7 @@ Similar to indexing in Python."
 (defmacro lm (&body body)
   `(lambda ,(lm-vars body)
      ,@body))
+
+(defun explode (sym)
+  (mapcar (lm (intern (coerce $ 'string)))
+	  (group (coerce (symbol-name sym) 'list) 1)))
