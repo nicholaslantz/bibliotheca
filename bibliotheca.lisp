@@ -1,10 +1,9 @@
 (defpackage :bibliotheca
-  (:use :cl)
+  (:use :cl :parachute)
   (:export :ensure-list
 	   :if-let :if-not-let :and-let :or-let :when-let :unless-let
-	   :list-equal
 	   :beginsp :endsp :containsp
-	   :join :split :split-if
+	   :join-list :split-list :split-list-if
 	   :range
 	   :flatten :zip
 	   :take :drop :group
@@ -23,9 +22,25 @@
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
+  "If ELT is a list it is returned unmodified.  Otherwise it is
+wrapped in a list."
   (if (listp elt)
       elt
       (list elt)))
+
+(define-test ensure-list
+  (of-type list (ensure-list 5))
+  (of-type list (ensure-list nil))
+  (of-type list (ensure-list (cons 1 nil)))
+  (of-type list (ensure-list '(1 2 3)))
+
+  (is equal '(5) (ensure-list 5))
+  (is equal '() (ensure-list nil))
+  (is equal '(1) (ensure-list (cons 1 nil)))
+  (is equal '(1 2 3) (ensure-list '(1 2 3))))
+
+;; XXX: How do we test macros?  For these we need to check that the
+;; bindings are bound and then the path is chosen appropriately.
 
 (defmacro if-let (binding then &optional (else nil))
   `(let ,binding
@@ -61,32 +76,49 @@
      (unless ,(caar bindings)
        ,@then)))
 
-(defun list-equal (l1 l2 &optional (test #'eql))
-  (cond ((and (null l1) (null l2)) t)
-	((or  (null l1) (null l2)) nil)
-	((funcall test (car l1) (car l2))
-	 (list-equal (cdr l1) (cdr l2)))
-	(t nil)))
-
 (defun beginsp (lst with)
   "If LST begins with WITH return the rest of it, otherwise NIL.
 
 Note: if LST and WITH are EQUAL, nil is returned."
-  (when (and (nthcdr (length with) lst)
-	     (equal (subseq lst 0 (length with)) with))
-    (subseq lst (length with))))
+  (let ((with (ensure-list with)))
+    (when (and (nthcdr (length with) lst)
+	       (equal (subseq lst 0 (length with)) with))
+      (subseq lst (length with)))))
+
+(define-test beginsp
+  (true (beginsp '(1 2 3) '(1)))
+  (true (beginsp '(1 2 3) '(1 2)))
+  (is equal nil (beginsp '(1 2 3) '(1 2 3)))
+
+  (true (beginsp '(1 2 3) 1))
+
+  (false (beginsp '(4 5 6) '(5 6))))
 
 (defun endsp (lst with)
-  "If LST ends with WITH, return the rest of it, otherwise NIL.
+  "If LST ends with WITH, return the the beginning of it, otherwise NIL.
 
 Note: if LST and WITH are EQUAL, nil is returned."
-  (when (and (nthcdr (length with) lst)
-	     (equal (subseq lst (- (length lst) (length with))) with))
-    (subseq lst 0 (- (length lst) (length with)))))
+  (let ((with (ensure-list with)))
+    (when (and (nthcdr (length with) lst)
+	       (equal (subseq lst (- (length lst) (length with))) with))
+      (subseq lst 0 (- (length lst) (length with))))))
 
+(define-test endsp
+  (true (endsp '(1 2 3) '(3)))
+  (true (endsp '(1 2 3) '(2 3)))
+  (is equal nil (endsp '(1 2 3) '(1 2 3)))
+
+  (fail (endsp '(1 2 3) 3))
+
+  (false (endsp '(4 5 6) '(4 5))))
+
+;; TODO: Add a COUNT keyword-arg, like remove family of functions.
 (defun containsp (lst sublst)
   "If LST contains at least 1 instance of SUBLST, return the rest of
-LST after the first occurence, otherwise NIL."
+LST after the first occurence, otherwise NIL.
+
+Note: if LST and SUBLST are EQUAL or if LST ends with SUBLST, nil
+is returned."
   (cond ((null lst) nil)
 	((beginsp lst sublst)
 	 (if (= (length lst) (length sublst))
@@ -94,7 +126,18 @@ LST after the first occurence, otherwise NIL."
 	     (subseq lst (length sublst))))
 	(t (containsp (cdr lst) sublst))))
 
-(defun join (elts with &optional (firstp t) (acc nil))
+(define-test containsp
+  (true (containsp '(1 2 3 4 5) '(2 3 4)))
+  (true (containsp '(1 2 3 4 5) '(1 2 3 4)))
+  (true (containsp '(1 2 3 4 5) '(3)))
+  
+  (is eql nil (containsp '(1 2 3 4 5) '(5)))
+
+  (fail (containsp '(1 2 3 4 5) 3) type-error))
+
+
+
+(defun join-list (elts with &optional (firstp t) (acc nil))
   (if (null elts)
       (reverse acc)
       (if firstp
@@ -103,7 +146,7 @@ LST after the first occurence, otherwise NIL."
 					    (reverse (ensure-list with))
 					    acc)))))
 
-(defun split (lst with &optional (stack nil) (acc nil))
+(defun split-list (lst with &optional (stack nil) (acc nil))
   "Split LST into sublists on boundaries WITH."
   (if (null lst)
       (if (consp stack)
@@ -115,7 +158,7 @@ LST after the first occurence, otherwise NIL."
 	      (split rst with nil acc))
 	  (split (cdr lst) with (cons (car lst) stack) acc))))
 
-(defun split-if (lst test &optional (stack nil) (acc nil))
+(defun split-list-if (lst test &optional (stack nil) (acc nil))
   (if (null lst)
       (if (consp stack)
 	  (reverse (cons (reverse stack) acc))
