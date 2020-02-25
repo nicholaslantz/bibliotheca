@@ -135,16 +135,24 @@ is returned."
 
   (fail (containsp '(1 2 3 4 5) 3) type-error))
 
+(defun join-list (elts with &optional (acc nil))
+  "Return a list containing ELTS with WITH between each of them.
 
-
-(defun join-list (elts with &optional (firstp t) (acc nil))
+e.g. (join-list '(a b c) '(0 1)) -> '(a 0 1 b 0 1 c)"
   (if (null elts)
       (reverse acc)
-      (if firstp
-	  (join (cdr elts) with nil (list (car elts)))
-	  (join (cdr elts) with nil (append (ensure-list (car elts))
-					    (reverse (ensure-list with))
-					    acc)))))
+      (if (null acc)
+	  (join-list (cdr elts) with (list (car elts)))
+	  (join-list (cdr elts) with (append (list (car elts))
+					     (reverse (ensure-list with))
+					     acc)))))
+
+(define-test join-list
+  (is equal '(1 2 1) (join-list '(1 1) '(2)))
+  (is equal '(1 0 1 0 1 0 1) (join-list '(1 1 1 1) 0))
+  (is equal '(a nil b) (join-list '(a b) '(nil)))
+
+  (is equal '(a b) (join-list '(a b) nil)))
 
 (defun split-list (lst with &optional (stack nil) (acc nil))
   "Split LST into sublists on boundaries WITH."
@@ -154,37 +162,51 @@ is returned."
 	  (reverse acc))
       (if-let ((rst (beginsp lst with)))
 	  (if (consp stack)
-	      (split rst with nil (cons (reverse stack) acc))
-	      (split rst with nil acc))
-	  (split (cdr lst) with (cons (car lst) stack) acc))))
+	      (split-list rst with nil (cons (reverse stack) acc))
+	      (split-list rst with nil acc))
+	  (split-list (cdr lst) with (cons (car lst) stack) acc))))
 
 (defun split-list-if (lst test &optional (stack nil) (acc nil))
+  "Split LST into SUBLSTS when TEST is true for the element being
+examined."
   (if (null lst)
       (if (consp stack)
 	  (reverse (cons (reverse stack) acc))
 	  (reverse acc))
       (if (funcall test (car lst))
 	  (if (consp stack)
-	      (split-if (cdr lst) test nil (cons (reverse stack) acc))
-	      (split-if (cdr lst) test nil acc))
-	  (split-if (cdr lst) test (cons (car lst) stack) acc))))
+	      (split-list-if (cdr lst) test nil (cons (reverse stack) acc))
+	      (split-list-if (cdr lst) test nil acc))
+	  (split-list-if (cdr lst) test (cons (car lst) stack) acc))))
 
-(defun range-int (start stop step &optional (acc nil))
-  "Implementation of range"
+(defun -range (start stop step)
   (if (< start stop)
-      (if (>= start stop)
-	  (reverse acc)
-	  (range-int (+ start step) stop step (cons start acc)))
-      (if (<= start stop)
-	  (reverse acc)
-	  (range-int (+ start step) stop step (cons start acc)))))
+      (-range-inc start stop step)
+      (-range-dec start stop step)))
+
+(defun -range-inc (start stop step &optional (acc nil))
+  (if (>= start stop)
+      (nreverse acc)
+      (-range-inc (+ start step) stop step (cons start acc))))
+
+(defun -range-dec (start stop step &optional (acc nil))
+  (if (<= start stop)
+      (nreverse acc)
+      (-range-dec (+ start step) stop step (cons start acc))))
 
 (defun range (start &optional (stop nil) (step nil))  
   "Produce list of numbers beginning from START (inclusive)
 and ending at STOP (exclusive) incrementing by STEP."
-  (cond ((and stop step) (range-int start stop step))
-	(stop (range-int start stop (if (> stop start) 1 -1)))
-	(t (range-int 0 start 1))))
+  (cond ((and stop step) (-range start stop step))
+	(stop (-range start stop (if (> stop start) 1 -1)))
+	(t (-range 0 start 1))))
+
+(define-test range
+  (is equal '(0 1 2 3) (range 4))
+  (is equal '(-2 -1 0 1 2) (range -2 3))
+  (is equal '(10 5 0) (range 10 -1 -5))
+  (is equal 100 (length (range 100)))
+  (is equal '(5 4 3 2 1) (range 5 0)))
 
 (defun flatten (lst &optional (rev t) (acc nil))
   "Return all atoms in nested list LST in a non-nested list.
