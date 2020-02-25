@@ -338,6 +338,7 @@ Similar to indexing in Python."
 				       :test #'string=))
 		   v)
     (mapcar #'intern v)
+    (remove-duplicates v)
     (sort v #'string<)))
 
 (defmacro lm (&body body)
