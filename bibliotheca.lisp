@@ -341,6 +341,15 @@ Similar to indexing in Python."
     (remove-duplicates v)
     (sort v #'string<)))
 
+;; FIXME: lm does not work when it is nested in another lm.
+;;
+;; That could be desirable as its meant for quick and easy functions.
+;; In that case, it should signal an error when it is nested.
+;;
+;; The error is that the lm-vars function captures the variable names
+;; inside of inner lm functions.  This causes the outer lambda
+;; functions to have more variables in their lambda-lists than they
+;; use, causing an invalid number of arguments error.
 (defmacro lm (&body body)
   `(lambda ,(lm-vars body)
      ,@body))
