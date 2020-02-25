@@ -216,14 +216,20 @@ and ending at STOP (exclusive) incrementing by STEP."
 
 If REV is nil, the returned list will not be reversed.  It is t by
 default."
-  (cond ((null lst)
-	 (if rev
-	     acc
-	     (nreverse acc)))
-	((atom (car lst))
-	 (flatten (cdr lst) rev (cons (car lst) acc)))
-	(t
-	 (flatten (cdr lst) rev (append (flatten (car lst)) acc)))))
+  (cond ((null lst) (if rev (nreverse acc) acc))
+	((atom (car lst)) (flatten (cdr lst)
+				   rev
+				   (cons (car lst) acc)))
+	(t (flatten (cdr lst)
+		    rev
+		    (append (flatten (car lst) nil) acc)))))
+
+(define-test flatten
+  (is equal '(1 2 3) (flatten '(1 2 3)))
+  (is equal '(3 2 1) (flatten '(1 2 3) nil))
+  (is equal '(1 2 3) (flatten '(1 (2 (3)))))
+  (is equal '(3 2 1) (flatten '(3 (2 (1)))))
+  (is equal '(3 2 1) (flatten '(1 (2 3)) nil)))
 
 (defun take (lst &optional (n 1) (acc nil))
   (if (or (endp lst) (zerop n))
