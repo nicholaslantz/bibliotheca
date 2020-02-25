@@ -179,10 +179,8 @@ examined."
 	      (split-list-if (cdr lst) test nil acc))
 	  (split-list-if (cdr lst) test (cons (car lst) stack) acc))))
 
-(defun -range (start stop step)
-  (if (< start stop)
-      (-range-inc start stop step)
-      (-range-dec start stop step)))
+;; FIXME: I think the -range* functions can be merged with some lambda
+;;        functions.  Merge if possible.
 
 (defun -range-inc (start stop step &optional (acc nil))
   (if (>= start stop)
@@ -193,6 +191,11 @@ examined."
   (if (<= start stop)
       (nreverse acc)
       (-range-dec (+ start step) stop step (cons start acc))))
+
+(defun -range (start stop step)
+  (if (< start stop)
+      (-range-inc start stop step)
+      (-range-dec start stop step)))
 
 (defun range (start &optional (stop nil) (step nil))  
   "Produce list of numbers beginning from START (inclusive)
