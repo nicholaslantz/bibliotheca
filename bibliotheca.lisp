@@ -209,13 +209,14 @@ and ending at STOP (exclusive) incrementing by STEP."
   (is equal '(5 4 3 2 1) (range 5 0)))
 
 (defun flatten (lst &optional (rev t) (acc nil))
-  "Return all atoms in nested list LST in a non-nested list.
+  "Return all atoms in nested list LST in a single-dimensional list.
 
-If REV is T, the returned list will be reversed"
+If REV is nil, the returned list will not be reversed.  It is t by
+default."
   (cond ((null lst)
 	 (if rev
 	     acc
-	     (reverse acc)))
+	     (nreverse acc)))
 	((atom (car lst))
 	 (flatten (cdr lst) rev (cons (car lst) acc)))
 	(t
