@@ -229,7 +229,14 @@ default."
   (is equal '(3 2 1) (flatten '(1 2 3) nil))
   (is equal '(1 2 3) (flatten '(1 (2 (3)))))
   (is equal '(3 2 1) (flatten '(3 (2 (1)))))
-  (is equal '(3 2 1) (flatten '(1 (2 3)) nil)))
+  (is equal '(3 2 1) (flatten '(1 (2 3)) nil))
+
+  (is equal
+      '(-1 0 1 2 3 4 5 6 7 8 9)
+      (flatten '((-1 0) (1) (2 (3 (4 5) (6 7) (8 (9)))))))
+  (is equal
+      '(9 8 7 6 5 4 3 2 1 0 -1)
+      (flatten '((-1 0) (1) (2 (3 (4 5) (6 7) (8 (9))))) nil)))
 
 (defun take (lst &optional (n 1) (acc nil))
   (if (or (endp lst) (zerop n))
