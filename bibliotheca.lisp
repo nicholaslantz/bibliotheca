@@ -239,21 +239,61 @@ default."
       (flatten '((-1 0) (1) (2 (3 (4 5) (6 7) (8 (9))))) nil)))
 
 (defun take (lst &optional (n 1) (acc nil))
-  (if (or (endp lst) (zerop n))
-      (values (nreverse acc) lst)
-      (take (cdr lst) (- n 1) (cons (car lst) acc))))
+  "Take N items from the front of LST."
+  (cond ((and (plusp n) (endp lst)) (error "Cannot take ~A from empty list" n))
+	((zerop n) (values (nreverse acc) lst))
+	(t (take (cdr lst) (- n 1) (cons (car lst) acc)))))
+
+(define-test take
+  (is-values (take '(1 2 3))
+    (equal '(1))
+    (equal '(2 3)))
+  (is-values (take '(1 2 3) 2)
+    (equal '(1 2))
+    (equal '(3)))
+  (is-values (take '(1 2) 2)
+    (equal '(1 2))
+    (equal '()))
+  (fail (take '()))
+  (fail (take '(1) 2)))
 
 (defun drop (lst &optional (n 1))
+  "Drop N items from the front of LST."
   (multiple-value-bind (head tail)
       (take lst n)
     (values tail head)))
 
+(define-test drop
+  (is-values (drop '(1 2 3))
+    (equal '(2 3))
+    (equal '(1)))
+  (is-values (drop '(1 2 3) 2)
+    (equal '(3))
+    (equal '(1 2)))
+  (is-values (drop '(1 2) 2)
+    (equal '())
+    (equal '(1 2)))
+  (fail (drop '()))
+  (fail (drop '(1) 2)))
+
 (defun group (lst n &optional (acc nil))
+  "Return lists of length N made of consecutive elements of LST.  If
+LST's length is not a multiple of N, excess items are not returned."
   (if (or (endp lst) (null (nthcdr (- n 1) lst)))
       (values (nreverse acc) lst)
       (multiple-value-bind (next rst)
 	  (take lst n)
 	(group rst n (cons next acc)))))
+
+(define-test group
+  (is equal '((1 2) (3 4)) (group '(1 2 3 4) 2))
+  (is equal '((1) (2) (3)) (group '(1 2 3) 1))
+  (is equal '((1 2) (3 4)) (group '(1 2 3 4 5) 2))
+  (fail (group '(1 2 3) 0))
+  (is equal '() (group '() 2))
+  (is-values (group '(1 2 3) 2)
+    (equal '((1 2)))
+    (equal '(3))))
 
 (defun zip (&rest lsts)
   (reduce (lambda (a b)
