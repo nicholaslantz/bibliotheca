@@ -337,7 +337,7 @@ Similar to indexing in Python."
   (nth (mod n (length lst)) lst))
 
 (defun choose (lst &optional (n 1))
-  "Take N uniforamally-distributed samples from LST with replacement."
+  "Take N uniformally-distributed samples from LST with replacement."
   (let ((res nil)
 	(len (length lst)))
     (dotimes (i n)
@@ -345,6 +345,24 @@ Similar to indexing in Python."
     (if (= n 1)
 	(car res)
 	res)))
+
+(define-test choose
+  (let ((lst '(0 1 2 3 4 5)))
+    (true (member (choose lst) lst))
+    (dolist (e (choose lst 5))
+      (true (member e lst)))
+    (is = 2 (length (choose lst 2)))
+    (of-type integer (choose lst))
+    (of-type list (choose lst 3))))
+
+(defun shuffle (lst)
+  (-shuffle lst))
+
+(defun -shuffle (lst &optional (acc nil))
+  (if (null lst)
+      acc
+      (let ((e (choose lst)))
+	(-shuffle (remove e lst :count 1) (cons e acc)))))
 
 (define-test shuffle
   (let* ((lst '(0 1 2 3 4 5))
@@ -361,15 +379,6 @@ Similar to indexing in Python."
 	  (setf passed t)
 	  (return))))
     (true passed)))
-
-(defun shuffle (lst)
-  (-shuffle lst))
-
-(defun -shuffle (lst &optional (acc nil))
-  (if (null lst)
-      acc
-      (let ((e (choose lst)))
-	(-shuffle (remove e lst :count 1) (cons e acc)))))
 
 (defun clamp (v a b)
   (max a (min v b)))
