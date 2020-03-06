@@ -10,7 +10,7 @@
 	   :assoc-default :assocdr :assocdr-if :assocdr-default
 	   :concat :join-strings
 	   :nth-wa
-	   :choose
+	   :choose :shuffle
 	   :clamp :lerp :invlerp :lmap
 	   :score :best :bestk
 	   :clearf
@@ -345,6 +345,31 @@ Similar to indexing in Python."
     (if (= n 1)
 	(car res)
 	res)))
+
+(define-test shuffle
+  (let* ((lst '(0 1 2 3 4 5))
+	 (shuf (shuffle lst)))
+    (is = (length lst) (length shuf))
+    (mapc (lambda (x)
+	    (true (member x lst)))
+	  shuf))
+  (let ((passed nil))
+    (dotimes (i 10)
+      (let* ((lst '(0 1 2 3 4 5))
+	     (shuf (shuffle lst)))
+	(when (not (equal lst shuf))
+	  (setf passed t)
+	  (return))))
+    (true passed)))
+
+(defun shuffle (lst)
+  (-shuffle lst))
+
+(defun -shuffle (lst &optional (acc nil))
+  (if (null lst)
+      acc
+      (let ((e (choose lst)))
+	(-shuffle (remove e lst :count 1) (cons e acc)))))
 
 (defun clamp (v a b)
   (max a (min v b)))
