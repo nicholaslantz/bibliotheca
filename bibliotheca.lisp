@@ -18,7 +18,8 @@
 	   :read-lines-until
 	   :strip-left :strip-right :strip
 	   :lm
-	   :explode))
+	   :call-with-bindings :with-bindings
+	   :explode :unexplode))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -433,6 +434,25 @@ Similar to indexing in Python."
   `(lambda ,(lm-vars body)
      ,@body))
 
+;; Both functions below inspired by Swank
+;; https://github.com/slime/slime/blob/1761172817d2e1a8b48c216bf0d261eb277ae562/swank.lisp
+
+(defun call-with-bindings (alist fun)
+  (if (null alist)
+      (funcall fun)
+      (let* ((rlist (reverse alist))
+	     (vars (mapcar #'car rlist))
+	     (vals (mapcar #'cdr rlist)))
+	(progv vars vals
+	  (funcall fun)))))
+
+(defmacro with-bindings (alist &body body)
+  "Bind ALIST to the local lexical environment of BODY."
+  `(call-with-bindings ,alist (lambda () ,@body)))
+
 (defun explode (sym)
   (mapcar (lm (intern (coerce $ 'string)))
 	  (group (coerce (symbol-name sym) 'list) 1)))
+
+(defun unexplode (syms)
+  (intern (apply #'concat (mapcar (lm (symbol-name $)) syms))))
