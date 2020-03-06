@@ -353,7 +353,8 @@ Similar to indexing in Python."
       (true (member e lst)))
     (is = 2 (length (choose lst 2)))
     (of-type integer (choose lst))
-    (of-type list (choose lst 3))))
+    (of-type list (choose lst 3))
+    (is = (length lst) (length (remove-duplicates (choose lst 100))))))
 
 (defun shuffle (lst)
   (-shuffle lst))
