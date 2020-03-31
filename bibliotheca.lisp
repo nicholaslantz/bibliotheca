@@ -19,7 +19,8 @@
 	   :strip-left :strip-right :strip
 	   :lm
 	   :call-with-bindings :with-bindings
-	   :explode :unexplode))
+	   :explode :unexplode
+	   :togglef))
 (in-package :bibliotheca)
 
 (defun ensure-list (elt)
@@ -491,3 +492,8 @@ Similar to indexing in Python."
 
 (defun unexplode (syms)
   (intern (apply #'concat (mapcar (lm (symbol-name $)) syms))))
+
+(defmacro togglef (place)
+  `(if ,place
+       (setf ,place nil)
+       (setf ,place t)))
