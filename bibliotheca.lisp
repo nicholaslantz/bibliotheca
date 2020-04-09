@@ -213,18 +213,21 @@ and ending at STOP (exclusive) incrementing by STEP."
   (is equal 100 (length (range 100)))
   (is equal '(5 4 3 2 1) (range 5 0)))
 
-(defun flatten (lst &optional (rev t) (acc nil))
-  "Return all atoms in nested list LST in a single-dimensional list.
+;; This function is used when compiling macro lm below, so must be
+;; available at compile time
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun flatten (lst &optional (rev t) (acc nil))
+    "Return all atoms in nested list LST in a single-dimensional list.
 
 If REV is nil, the returned list will not be reversed.  It is t by
 default."
-  (cond ((null lst) (if rev (nreverse acc) acc))
-	((atom (car lst)) (flatten (cdr lst)
-				   rev
-				   (cons (car lst) acc)))
-	(t (flatten (cdr lst)
-		    rev
-		    (append (flatten (car lst) nil) acc)))))
+    (cond ((null lst) (if rev (nreverse acc) acc))
+	  ((atom (car lst)) (flatten (cdr lst)
+				     rev
+				     (cons (car lst) acc)))
+	  (t (flatten (cdr lst)
+		      rev
+		      (append (flatten (car lst) nil) acc))))))
 
 (define-test flatten
   (is equal '(1 2 3) (flatten '(1 2 3)))
@@ -445,17 +448,18 @@ Similar to indexing in Python."
 (defun strip (line &optional (what '(#\Return #\Newline #\Space)))
   (strip-right (strip-left line what) what))
 
-(defun lm-vars (form)
-  (as~> v form
-    (flatten v)
-    (remove-if-not #'symbolp v)
-    (mapcar #'symbol-name v)
-    (remove-if-not (lambda (s) (member s '("$" "$1" "$2" "$3" "$4")
-				       :test #'string=))
-		   v)
-    (mapcar #'intern v)
-    (remove-duplicates v)
-    (sort v #'string<)))
+(eval-when (:compile-toplevel)
+  (defun lm-vars (form)
+    (as~> v form
+      (flatten v)
+      (remove-if-not #'symbolp v)
+      (mapcar #'symbol-name v)
+      (remove-if-not (lambda (s) (member s '("$" "$1" "$2" "$3" "$4")
+					 :test #'string=))
+		     v)
+      (mapcar #'intern v)
+      (remove-duplicates v)
+      (sort v #'string<))))
 
 ;; FIXME: lm does not work when it is nested in another lm.
 ;;
